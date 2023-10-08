@@ -4,25 +4,52 @@ const jwt = require('jsonwebtoken');
 const exjwt = require('express-jwt');
 const bodyParser = require('body-parser');
 const path = require('path');
+const { verify } = require('crypto');
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Headers', 'Content-type,Authorization');
     next();
 });
-
-
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = 3000;
 const secretKey = 'My super secret key';
-
 const jwtMW = exjwt({
     secret: secretKey,
     algorithms: ['HS256']
 });
+
+
+var TokenValidity = function(req,res,next)
+{
+    var tdata = req.header('authorization').split(" ")[1];
+    if(!tdata)
+        return res.status(400).send({data: "No Token found"});
+    var av = req.header('authorization').split(" ")[1];
+    if(av){
+        check = av;
+        try {
+            Status = jwt.verify(check, secretKey);
+            if(!Status){
+                return res.status(400).send("No token available to check");
+            }
+            if(!Status.username){
+                return res.status(400).send("Unauthorized User");
+            }
+            next();
+          } catch(err) {
+            res.json({
+                success: false,
+                myContent: err.toString() + " Please login again!"
+            });
+          }
+    }
+    else {
+        return res.status(400).send("No header present");
+    }
+};
 
 let users = [
     {
@@ -38,13 +65,14 @@ let users = [
 ];
 
 //let flag=0;
-
+let flag=false;
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     for(let user of users) {
         if(username==user.username && password==user.password) {
             //flag=1;
-            let token=jwt.sign({ id:user.id,username:user.username},secretKey,{expiresIn:'10s'});
+            let token=jwt.sign({ id:user.id,username:user.username},secretKey,{expiresIn:'3m'});
+            flag=true;
             res.json({
                 success: true,
                 err: null,
@@ -52,17 +80,17 @@ app.post('/api/login', (req, res) => {
             });
             break;
         }
-        else{
+    }
+    if(flag===false){
             res.status(401).json({
                 success:false,
                 token:null,
                 err:'username or Password is incorrect'
             });
         }
-    } 
 });
 
-app.get('/api/dashboard', jwtMW, (req,res)=>{
+app.get('/api/dashboard', TokenValidity, (req,res)=>{
     //if(flag){
     res.json({
         success:true,
@@ -71,14 +99,14 @@ app.get('/api/dashboard', jwtMW, (req,res)=>{
 //}
 });
 
-app.get('/api/prices', jwtMW, (req,res)=>{
+app.get('/api/prices', TokenValidity, (req,res)=>{
     res.json({
         success:true,
         myContent:'This is the price $5.99'
     });
 });
 
-app.get('/api/settings', jwtMW, (req, res) => {
+app.get('/api/settings', TokenValidity, (req, res) => {
     //if(flag){
     res.json({
         success:true,
