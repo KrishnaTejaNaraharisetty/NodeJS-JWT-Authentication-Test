@@ -63,11 +63,12 @@
                     var button=document.createElement('button');
                     button.innerHTML='Go to Settings page';
                     button.setAttribute('onclick', 'getSettings()');
+                    document.querySelector('main').appendChild(button);  
                     /*
-                    var button2=document.createElement('button');
-                    button2.innerHTML='Back to Login page';
-                    button2.setAttribute('onclick', 'login()');
-                    document.querySelector('main').appendChild(button2);
+                    var buttont=document.createElement('button');
+                    buttont.innerHTML='Logout';
+                    buttont.setAttribute('onclick', './');
+                    document.querySelector('main').appendChild(buttont);  
                     */
                 }
                 else

@@ -42,7 +42,7 @@ var TokenValidity = function(req,res,next)
           } catch(err) {
             res.json({
                 success: false,
-                myContent: err.toString() + " Please login again!"
+                myContent: "Time Out! Please login again"
             });
           }
     }
@@ -85,7 +85,7 @@ app.post('/api/login', (req, res) => {
             res.status(401).json({
                 success:false,
                 token:null,
-                err:'username or Password is incorrect'
+                err:'Username or Password is incorrect'
             });
         }
 });
